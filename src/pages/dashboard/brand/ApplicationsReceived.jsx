@@ -54,16 +54,27 @@ export default function ApplicationsReceived() {
   }
 
   const handleRespond = async (id, action) => {
-    try {
+  try {
+    if (action === 'accept') {
+      // Pehle application accept karo
+      await axios.put(`/applications/${id}/respond`, { action })
+      // Phir collaboration create karo
+      await axios.post('/collaborations', { applicationId: id })
+      setApplications(prev => prev.map(a =>
+        a._id === id ? { ...a, status: 'accepted' } : a
+      ))
+      showToast('✅ Collaboration started! Chat is now unlocked.')
+    } else {
       await axios.put(`/applications/${id}/respond`, { action })
       setApplications(prev => prev.map(a =>
-        a._id === id ? { ...a, status: action === 'accept' ? 'accepted' : 'rejected' } : a
+        a._id === id ? { ...a, status: 'rejected' } : a
       ))
-      showToast(action === 'accept' ? '✅ Application accepted!' : '❌ Application rejected')
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Failed')
+      showToast('❌ Application rejected')
     }
+  } catch (err) {
+    showToast(err.response?.data?.message || 'Failed')
   }
+}
 
   const handleCounter = async () => {
     if (!counterAmount) return
