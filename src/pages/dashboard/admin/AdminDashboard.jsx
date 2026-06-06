@@ -24,7 +24,7 @@ const [stats, setStats] = useState({
 
   useEffect(() => { fetchAll() }, [])
 
-  const fetchAll = async () => {
+ const fetchAll = async () => {
   try {
     const [usersRes, oppsRes, collabsRes, paymentsRes] = await Promise.all([
       axios.get('/admin/users'),
@@ -64,6 +64,7 @@ const [stats, setStats] = useState({
     setLoading(false)
   }
 }
+
   const roleColors = {
     creator: 'bg-blue-50 text-blue-700',
     brand:   'bg-yellow-50 text-yellow-700',
@@ -98,7 +99,7 @@ const [stats, setStats] = useState({
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
+       {[
   { label: 'Total Users',          value: stats.users,                                    icon: '👥', color: 'bg-blue-50 text-blue-700',     to: '/admin/users' },
   { label: 'Total Opportunities',  value: stats.opportunities,                            icon: '📢', color: 'bg-yellow-50 text-yellow-700', to: '/admin/opportunities' },
   { label: 'Active Collabs',       value: stats.activeCollabs,                            icon: '🤝', color: 'bg-green-50 text-green-700',   to: '/admin/collaborations' },
@@ -112,19 +113,10 @@ const [stats, setStats] = useState({
     <div className="text-xl font-black text-secondary">{s.value}</div>
     <div className="text-xs text-muted mt-0.5">{s.label}</div>
   </Link>
-  
-)
- (
-          <Link key={i} to={s.to}
-            className="bg-card rounded-2xl p-5 border border-border shadow-card hover:shadow-purple hover:border-primary transition-all">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 ${s.color}`}>
-              {s.icon}
-            </div>
-            <div className="text-xl font-black text-secondary">{s.value}</div>
-            <div className="text-xs text-muted mt-0.5">{s.label}</div>
-          </Link>
-        ))}
-        {/* Extra Stats */}
+))}
+
+      </div>
+      {/* Extra Stats */}
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
   <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 flex items-center gap-4">
     <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center text-2xl">⏳</div>
@@ -147,7 +139,6 @@ const [stats, setStats] = useState({
     </div>
   </div>
 </div>
-      </div>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
