@@ -112,8 +112,19 @@ const [stats, setStats] = useState({
     <div className="text-xl font-black text-secondary">{s.value}</div>
     <div className="text-xs text-muted mt-0.5">{s.label}</div>
   </Link>
-))} 
-{/* Extra Stats */}
+  
+)
+ (
+          <Link key={i} to={s.to}
+            className="bg-card rounded-2xl p-5 border border-border shadow-card hover:shadow-purple hover:border-primary transition-all">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 ${s.color}`}>
+              {s.icon}
+            </div>
+            <div className="text-xl font-black text-secondary">{s.value}</div>
+            <div className="text-xs text-muted mt-0.5">{s.label}</div>
+          </Link>
+        ))}
+        {/* Extra Stats */}
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
   <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 flex items-center gap-4">
     <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center text-2xl">⏳</div>
