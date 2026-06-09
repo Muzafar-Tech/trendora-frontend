@@ -8,13 +8,16 @@ export default function CreatorProfile() {
   const { user, login } = useAuth()
 
   const [form, setForm] = useState({
-    fullName:        user?.fullName || '',
-    email:           user?.email || '',
-    socialPlatform:  user?.socialPlatform || '',
-    socialProfileUrl:user?.socialProfileUrl || '',
-    address:         user?.address || '',
-    jazzCashNumber:  user?.jazzCashNumber || '',
-    easypaisaNumber: user?.easypaisaNumber || '',
+    fullName:          user?.fullName || '',
+    email:             user?.email || '',
+    socialPlatform:    user?.socialPlatform || '',
+    socialProfileUrl:  user?.socialProfileUrl || '',
+    address:           user?.address || '',
+    jazzCashNumber:    user?.jazzCashNumber || '',
+    easypaisaNumber:   user?.easypaisaNumber || '',
+    bankName:          user?.bankName || '',
+    bankAccountNumber: user?.bankAccountNumber || '',
+    bankAccountTitle:  user?.bankAccountTitle || '',
   })
 
   const [passForm, setPassForm] = useState({
@@ -23,12 +26,12 @@ export default function CreatorProfile() {
     confirmPassword: '',
   })
 
-  const [loading, setLoading]     = useState(false)
+  const [loading, setLoading]         = useState(false)
   const [passLoading, setPassLoading] = useState(false)
-  const [toast, setToast]         = useState('')
-  const [toastType, setToastType] = useState('success')
+  const [toast, setToast]             = useState('')
+  const [toastType, setToastType]     = useState('success')
 
-  const update = (field, val) => setForm(prev => ({ ...prev, [field]: val }))
+  const update     = (field, val) => setForm(prev => ({ ...prev, [field]: val }))
   const updatePass = (field, val) => setPassForm(prev => ({ ...prev, [field]: val }))
 
   const showToast = (msg, type = 'success') => {
@@ -130,10 +133,10 @@ export default function CreatorProfile() {
           </div>
         </div>
 
-        {/* Forms */}
+        {/* Forms — col-span-2 */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Profile Info */}
+          {/* ── Personal Info + Payment ── */}
           <div className="bg-card rounded-2xl border border-border shadow-card p-6">
             <h2 className="font-bold text-secondary mb-5">Personal Information</h2>
             <form onSubmit={handleProfileUpdate} className="space-y-4">
@@ -181,33 +184,90 @@ export default function CreatorProfile() {
 
               {/* Payment Info */}
               <div className="pt-4 border-t border-border">
-                <h3 className="font-bold text-secondary mb-3 text-sm">Payment Information</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="font-bold text-secondary mb-1 text-sm">
+                  💰 Payment Information
+                </h3>
+                <p className="text-xs text-muted mb-4">
+                  Admin will use these details to send your payment after work approval.
+                </p>
+
+                <div className="space-y-4">
+                  {/* JazzCash / Easypaisa */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-secondary mb-1.5">
+                        JazzCash Number
+                      </label>
+                      <input
+                        type="text" placeholder="03XX-XXXXXXX"
+                        value={form.jazzCashNumber}
+                        onChange={e => update('jazzCashNumber', e.target.value)}
+                        className="w-full px-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-secondary mb-1.5">
+                        Easypaisa Number
+                      </label>
+                      <input
+                        type="text" placeholder="03XX-XXXXXXX"
+                        value={form.easypaisaNumber}
+                        onChange={e => update('easypaisaNumber', e.target.value)}
+                        className="w-full px-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bank */}
                   <div>
-                    <label className="block text-sm font-semibold text-secondary mb-1.5">JazzCash Number</label>
-                    <input type="text" placeholder="03XX-XXXXXXX"
-                      value={form.jazzCashNumber} onChange={e => update('jazzCashNumber', e.target.value)}
+                    <label className="block text-sm font-semibold text-secondary mb-1.5">
+                      Bank Name (Optional)
+                    </label>
+                    <input
+                      type="text" placeholder="e.g. HBL, UBL, Meezan"
+                      value={form.bankName}
+                      onChange={e => update('bankName', e.target.value)}
                       className="w-full px-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-secondary mb-1.5">Easypaisa Number</label>
-                    <input type="text" placeholder="03XX-XXXXXXX"
-                      value={form.easypaisaNumber} onChange={e => update('easypaisaNumber', e.target.value)}
-                      className="w-full px-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
-                    />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-secondary mb-1.5">
+                        Account Number
+                      </label>
+                      <input
+                        type="text" placeholder="Bank account number"
+                        value={form.bankAccountNumber}
+                        onChange={e => update('bankAccountNumber', e.target.value)}
+                        className="w-full px-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-secondary mb-1.5">
+                        Account Title
+                      </label>
+                      <input
+                        type="text" placeholder="Account holder name"
+                        value={form.bankAccountTitle}
+                        onChange={e => update('bankAccountTitle', e.target.value)}
+                        className="w-full px-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
+              {/* Save Profile Button */}
               <button type="submit" disabled={loading}
                 className="w-full py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl transition-colors text-sm disabled:opacity-60">
                 {loading ? 'Saving...' : 'Save Changes'}
               </button>
+
             </form>
           </div>
 
-          {/* Change Password */}
+          {/* ── Change Password ── */}
           <div className="bg-card rounded-2xl border border-border shadow-card p-6">
             <h2 className="font-bold text-secondary mb-5">Change Password</h2>
             <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -241,8 +301,8 @@ export default function CreatorProfile() {
             </form>
           </div>
 
-        </div>
-      </div>
+        </div>{/* end lg:col-span-2 */}
+      </div>{/* end grid */}
     </DashboardLayout>
   )
 }
