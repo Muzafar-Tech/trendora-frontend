@@ -86,12 +86,29 @@ export default function ManagePayments() {
     filter === 'all' ? true : p.status === filter
   )
 
-  const stats = [
-    { label: 'Total Received',  value: `PKR ${payments.filter(p => p.status !== 'refunded').reduce((a, p) => a + (p.totalAmount || 0), 0).toLocaleString()}`, icon: '💰', color: 'bg-green-50 text-green-700' },
-    { label: 'Needs Verify',    value: payments.filter(p => p.status === 'screenshot_uploaded').length, icon: '📸', color: 'bg-yellow-50 text-yellow-700' },
-    { label: 'To Release',      value: payments.filter(p => p.status === 'verified').length, icon: '🔄', color: 'bg-blue-50 text-blue-700' },
-    { label: 'Commission',      value: `PKR ${payments.filter(p => p.status === 'released').reduce((a, p) => a + (p.platformCommission || 0), 0).toLocaleString()}`, icon: '📊', color: 'bg-purple-50 text-primary' },
-  ]
+ // Stats update karo
+const stats = [
+  {
+    label: 'Total Received',
+    value: `PKR ${payments.filter(p => p.status !== 'refunded').reduce((a, p) => a + (p.totalAmount || 0), 0).toLocaleString()}`,
+    icon: '💰', color: 'bg-green-50 text-green-700'
+  },
+  {
+    label: 'Needs Verify',
+    value: payments.filter(p => p.status === 'screenshot_uploaded').length,
+    icon: '📸', color: 'bg-yellow-50 text-yellow-700'
+  },
+  {
+    label: 'Ready to Release',  // ← Brand approved
+    value: payments.filter(p => p.status === 'verified').length,
+    icon: '🔄', color: 'bg-blue-50 text-blue-700'
+  },
+  {
+    label: 'Commission Earned',
+    value: `PKR ${payments.filter(p => p.status === 'released').reduce((a, p) => a + (p.platformCommission || 0), 0).toLocaleString()}`,
+    icon: '📊', color: 'bg-purple-50 text-primary'
+  },
+]
 
   return (
     <DashboardLayout links={adminLinks}>

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
 import axios from '../../../utils/axios'
 import socket from '../../../utils/socket'
+import { showPushNotification } from '../../../utils/pushNotifications'
 
 export default function DashboardLayout({ children, links }) {
   const [sidebarOpen, setSidebarOpen]     = useState(false)
@@ -23,6 +24,9 @@ export default function DashboardLayout({ children, links }) {
     socket.on('new_notification', (notif) => {
       setNotifications(prev => [notif, ...prev])
       setUnreadCount(prev => prev + 1)
+       playNotificationSound() 
+         showPushNotification(notif.title, notif.message, notif.link)
+
     })
 
     return () => {
@@ -72,7 +76,14 @@ export default function DashboardLayout({ children, links }) {
       if (notif.link) navigate(notif.link)
     } catch {}
   }
-
+// Sound function add karo — component ke bahar
+const playNotificationSound = () => {
+  try {
+    const audio = new Audio('/notification.mp3')
+    audio.volume = 0.5
+    audio.play().catch(() => {})
+  } catch {}
+}
   const handleLogout = () => {
     logout()
     navigate('/login')

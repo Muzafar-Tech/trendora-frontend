@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import authBg from '../../assets/auth-bg.jpeg'
-
+import axios from '../../utils/axios'
 export default function Signup() {
   const [role, setRole]           = useState('creator')
   const [showPass, setShowPass]   = useState(false)
@@ -22,31 +22,32 @@ export default function Signup() {
 
   const update = (field, val) => setForm(prev => ({ ...prev, [field]: val }))
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setError('')
 
-    if (form.password !== form.confirmPassword) {
-      return setError('Passwords do not match')
-    }
-    if (form.password.length < 6) {
-      return setError('Password must be at least 6 characters')
-    }
-    if (!agreed) {
-      return setError('Please agree to Terms & Conditions')
-    }
-
-    setLoading(true)
-    try {
-      const user = await register({ role, ...form })
-      if (user.role === 'brand') navigate('/brand/dashboard')
-      else navigate('/creator/dashboard')
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+  if (form.password !== form.confirmPassword) {
+    return setError('Passwords do not match')
   }
+  if (form.password.length < 6) {
+    return setError('Password must be at least 6 characters')
+  }
+  if (!agreed) {
+    return setError('Please agree to Terms & Conditions')
+  }
+
+  setLoading(true)
+  try {
+    // ✅ axios import karo ya register use karo
+    const axiosInstance = (await import('../../utils/axios')).default
+    const res = await axiosInstance.post('/auth/register', { role, ...form })
+    navigate('/verify-email', { state: { userId: res.data.userId } })
+  } catch (err) {
+    setError(err.response?.data?.message || 'Registration failed.')
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (
     <div className="min-h-screen flex">

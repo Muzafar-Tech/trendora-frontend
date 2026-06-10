@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import axios from '../utils/axios'
 import socket from '../utils/socket'
+import { requestPermission } from '../utils/pushNotifications'
 
 const AuthContext = createContext()
 
@@ -50,6 +51,8 @@ const initAuth = async () => {
     setUser(res.data)
     socket.connect()
     socket.emit('join', res.data._id)
+      await requestPermission()
+
     return res.data
   }
 

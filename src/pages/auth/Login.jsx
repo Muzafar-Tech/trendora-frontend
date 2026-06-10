@@ -14,22 +14,27 @@ export default function Login() {
   const { login } = useAuth()
   const navigate  = useNavigate()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const user = await login(email, password)
-      // Role ke hisab se redirect
-      if (user.role === 'admin')   navigate('/admin/dashboard')
-      else if (user.role === 'brand')   navigate('/brand/dashboard')
-      else navigate('/creator/dashboard')
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.')
-    } finally {
-      setLoading(false)
+ const handleSubmit = async (e) => {
+  e.preventDefault()
+  setError('')
+  setLoading(true)
+  try {
+    const user = await login(email, password)
+    if (user.role === 'admin')        navigate('/admin/dashboard')
+    else if (user.role === 'brand')   navigate('/brand/dashboard')
+    else                              navigate('/creator/dashboard')
+  } catch (err) {
+    const data = err.response?.data
+    // ✅ Email verify nahi hua
+    if (data?.needsVerification) {
+      navigate('/verify-email', { state: { userId: data.userId } })
+      return
     }
+    setError(data?.message || 'Login failed.')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div className="min-h-screen flex">

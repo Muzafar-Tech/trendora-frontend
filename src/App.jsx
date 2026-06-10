@@ -17,6 +17,7 @@ import Terms            from './pages/Terms'
 import Login          from './pages/auth/Login'
 import Signup         from './pages/auth/Signup'
 import ForgotPassword from './pages/auth/ForgotPassword'
+import VerifyEmail from './pages/auth/VerifyEmail'
 
 // Creator Dashboard
 import CreatorDashboard     from './pages/dashboard/creator/CreatorDashboard'
@@ -84,6 +85,8 @@ function App() {
         {/* Auth */}
         <Route path="/login"           element={<Login />} />
         <Route path="/signup"          element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Creator */}
