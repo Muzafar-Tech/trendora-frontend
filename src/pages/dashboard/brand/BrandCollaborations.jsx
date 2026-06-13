@@ -61,13 +61,19 @@ useEffect(() => {
     if (!selected) return
     if (selected.chatUnlocked) fetchMessages(selected._id)
     socket.emit('join_collaboration', selected._id)
-    socket.on('new_message', (msg) => {
-      setMessages(prev => {
-        const exists = prev.find(m => m._id === msg._id)
-        if (exists) return prev
-        return [...prev, msg]
-      })
-    })
+ socket.on('new_message', (msg) => {
+  setMessages(prev => {
+    // ✅ ID se duplicate check
+    if (prev.some(m => m._id?.toString() === msg._id?.toString())) {
+      return prev
+    }
+    return [...prev, msg]
+  })
+  // ✅ Auto scroll
+  setTimeout(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, 50)
+})
     return () => { socket.off('new_message') }
   }, [selected])
 
@@ -110,28 +116,33 @@ useEffect(() => {
   }
 
   const handleSendMsg = async (e) => {
-    e.preventDefault()
-    if (!newMsg.trim()) return
-    try {
-      await axios.post(`/messages/${selected._id}`, { message: newMsg })
-      setNewMsg('')
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to send message')
-    }
-  }
+  e.preventDefault()
+  if (!newMsg.trim()) return
 
-  const handleApprove = async (id) => {
-    try {
-      await axios.put(`/collaborations/${id}/approve`)
-      setCollaborations(prev => prev.map(c =>
-        c._id === id ? { ...c, status: 'completed' } : c
-      ))
-      if (selected?._id === id) setSelected(prev => ({ ...prev, status: 'completed' }))
-      showToast('✅ Work approved! Admin will release payment soon.')
-    } catch {
-      showToast('Failed to approve')
-    }
+  const msgText = newMsg
+  setNewMsg('') // ✅ Pehle clear karo — instant feel
+
+  try {
+    await axios.post(`/messages/${selected._id}`, { message: msgText })
+    // Socket se message aayega — manually add mat karo
+  } catch (err) {
+    setNewMsg(msgText) // ✅ Error pe wapis restore karo
+    showToast(err.response?.data?.message || 'Failed to send message')
   }
+}
+ const handleApprove = async (id) => {
+  try {
+    await axios.put(`/collaborations/${id}/approve`)
+    setCollaborations(prev => prev.map(c =>
+      c._id === id ? { ...c, status: 'completed' } : c
+    ))
+    if (selected?._id === id) setSelected(prev => ({ ...prev, status: 'completed' }))
+    showToast('✅ Work approved! Admin will release payment soon.')
+  } catch (err) {
+    showToast(err.response?.data?.message || 'Failed to approve')
+    console.error('Approve error:', err.response?.data)  // ← ye add karo
+  }
+}
 
   const handleRevision = async () => {
     if (!revisionNote.trim()) return
