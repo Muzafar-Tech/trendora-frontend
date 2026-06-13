@@ -79,7 +79,7 @@ export default function DashboardLayout({ children, links }) {
 // Sound function add karo — component ke bahar
 const playNotificationSound = () => {
   try {
-    const audio = new Audio('/notification.mp3')
+    const audio = new Audio('/notification.wav')
     audio.volume = 0.5
     audio.play().catch(() => {})
   } catch {}
