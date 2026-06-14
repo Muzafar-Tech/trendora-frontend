@@ -35,23 +35,11 @@ useEffect(() => {
     fetchCollaborations()
   })
 
-  // ✅ Collaboration update — chat unlock
+  // ✅ Collaboration update — full refetch for latest data
   socket.on('collaboration_updated', (data) => {
     console.log('collaboration_updated received:', data)
-
-    setCollaborations(prev => prev.map(c =>
-      c._id.toString() === data.collaborationId.toString()
-        ? { ...c, chatUnlocked: data.chatUnlocked, status: data.status }
-        : c
-    ))
-
-    setSelected(prev => {
-      if (!prev) return prev
-      if (prev._id.toString() === data.collaborationId.toString()) {
-        return { ...prev, chatUnlocked: data.chatUnlocked, status: data.status }
-      }
-      return prev
-    })
+    // Full refetch to ensure we have the latest data
+    fetchCollaborations()
   })
 
   return () => {
@@ -165,6 +153,20 @@ useEffect(() => {
       setWorkLink('')
     } catch {
       showToast('Failed to submit work')
+    }
+  }
+
+  const handleDeleteCollaboration = async (id) => {
+    if (!window.confirm('Are you sure you want to cancel this collaboration?')) return
+    try {
+      await axios.delete(`/collaborations/${id}`)
+      setCollaborations(prev => prev.filter(c => c._id !== id))
+      if (selected?._id === id) {
+        setSelected(null)
+      }
+      showToast('✅ Collaboration cancelled')
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to cancel')
     }
   }
 
@@ -316,6 +318,15 @@ useEffect(() => {
                       className="flex-1 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-dark transition-colors"
                     >
                       📦 Submit Work
+                    </button>
+                  )}
+                  {(c.status === 'payment_pending' || c.status === 'active' || c.status === 'revision' || c.status === 'completed') && (
+                    <button
+                      onClick={e => { e.stopPropagation(); handleDeleteCollaboration(c._id) }}
+                      className="py-2 px-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl hover:bg-red-100 transition-colors"
+                      title="Delete collaboration"
+                    >
+                      🗑️
                     </button>
                   )}
                 </div>
