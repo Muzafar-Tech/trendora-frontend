@@ -102,9 +102,14 @@ export default function BrandCollaborations() {
 
   const fetchMessages = async (id) => {
     try {
-      const res = await axios.get(`/messages/${id}`)
-      setMessages(res.data)
-    } catch {
+      // ✅ Join collaboration room first
+      await axios.post(`/messages/${id}/join`)
+      
+      // ✅ Fetch messages with pagination (page 1, 50 messages)
+      const res = await axios.get(`/messages/${id}?page=1&limit=50`)
+      setMessages(res.data.messages || res.data)
+    } catch (err) {
+      console.error('fetchMessages error:', err.message)
       setMessages([])
     }
   }

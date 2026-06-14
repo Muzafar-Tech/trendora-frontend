@@ -62,6 +62,17 @@ export default function ManagePayments() {
 
   const handleRelease = async () => {
     if (!releaseRef.trim()) return showToast('Please enter transaction reference')
+    
+    // ✅ Check if brand has approved the work
+    if (releaseModal.collaborationId?.status !== 'completed') {
+      showToast(`⚠️ Cannot release - Brand hasn't approved work yet (Status: ${releaseModal.collaborationId?.status})`)
+      return
+    }
+    if (releaseModal.collaborationId?.paymentStatus !== 'paid') {
+      showToast(`⚠️ Cannot release - Payment not marked as paid by brand`)
+      return
+    }
+
     setReleasing(true)
     try {
       await axios.put(`/admin/payments/${releaseModal._id}/release`, {
@@ -75,8 +86,8 @@ export default function ManagePayments() {
       setReleaseModal(null)
       setReleaseNote('')
       setReleaseRef('')
-    } catch {
-      showToast('Action failed.')
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Action failed.')
     } finally {
       setReleasing(false)
     }
@@ -191,6 +202,39 @@ const stats = [
 
             <div className="p-6 space-y-4">
 
+              {/* ✅ Show Collaboration Status */}
+              <div className={`rounded-xl p-4 ${
+                releaseModal.collaborationId?.status === 'completed' && releaseModal.collaborationId?.paymentStatus === 'paid'
+                  ? 'bg-green-50 border border-green-200'
+                  : 'bg-orange-50 border border-orange-200'
+              }`}>
+                <p className="text-xs font-bold mb-2 text-secondary">📋 Collaboration Status:</p>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted">Work Status:</span>
+                    <span className={`font-bold ${releaseModal.collaborationId?.status === 'completed' ? 'text-green-700' : 'text-orange-600'}`}>
+                      {releaseModal.collaborationId?.status === 'completed' ? '✅ Completed' : `⏳ ${releaseModal.collaborationId?.status}`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted">Payment Status:</span>
+                    <span className={`font-bold ${releaseModal.collaborationId?.paymentStatus === 'paid' ? 'text-green-700' : 'text-orange-600'}`}>
+                      {releaseModal.collaborationId?.paymentStatus === 'paid' ? '✅ Paid' : `⏳ ${releaseModal.collaborationId?.paymentStatus}`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* ⚠️ Warning if brand hasn't approved */}
+                {(releaseModal.collaborationId?.status !== 'completed' || releaseModal.collaborationId?.paymentStatus !== 'paid') && (
+                  <div className="mt-3 p-3 bg-orange-100 rounded-lg border border-orange-300">
+                    <p className="text-xs font-semibold text-orange-700">⚠️ Cannot Release Yet</p>
+                    <p className="text-xs text-orange-600 mt-1">
+                      Brand must first approve the submitted work before you can release payment.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Creator Payment Info */}
               <div className="bg-primary-light rounded-xl p-4">
                 <p className="text-xs font-bold text-primary mb-3">👤 Creator Payment Details:</p>
@@ -284,8 +328,8 @@ const stats = [
                 </button>
                 <button
                   onClick={handleRelease}
-                  disabled={releasing || !releaseRef.trim()}
-                  className="flex-1 py-2.5 bg-green-500 text-white rounded-xl text-sm font-bold hover:bg-green-600 transition-colors disabled:opacity-60"
+                  disabled={releasing || !releaseRef.trim() || releaseModal.collaborationId?.status !== 'completed' || releaseModal.collaborationId?.paymentStatus !== 'paid'}
+                  className="flex-1 py-2.5 bg-green-500 text-white rounded-xl text-sm font-bold hover:bg-green-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {releasing ? 'Releasing...' : '💰 Confirm Release'}
                 </button>
@@ -444,12 +488,32 @@ const stats = [
                         </button>
                       )}
                       {p.status === 'verified' && (
-                        <button
-                          onClick={() => setReleaseModal(p)}
-                          className="px-3 py-1.5 text-xs font-bold bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                        >
-                          💰 Release Payment
-                        </button>
+                        <>
+                          {p.collaborationId?.status === 'completed' && p.collaborationId?.paymentStatus === 'paid' ? (
+                            <button
+                              onClick={() => setReleaseModal(p)}
+                              className="px-3 py-1.5 text-xs font-bold bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                              title="Brand approved work - Ready to release"
+                            >
+                              💰 Release Payment
+                            </button>
+                          ) : (
+                            <div className="relative group">
+                              <button
+                                disabled
+                                className="px-3 py-1.5 text-xs font-bold bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed opacity-60"
+                                title="Waiting for brand approval"
+                              >
+                                ⏳ Awaiting Brand
+                              </button>
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-black text-white text-xs rounded p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-normal">
+                                ⏳ Waiting for brand to approve work completion
+                                <br/>
+                                Current: {p.collaborationId?.status || 'unknown'}
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                       {p.status === 'pending' && (
                         <span className="px-3 py-1.5 text-xs font-semibold bg-gray-100 text-gray-500 rounded-lg">
