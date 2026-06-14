@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DashboardLayout from '../shared/DashboardLayout'
 import { creatorLinks } from './CreatorDashboard'
 import { useAuth } from '../../../context/AuthContext'
@@ -6,6 +6,19 @@ import axios from '../../../utils/axios'
 
 export default function CreatorProfile() {
   const { user, login } = useAuth()
+
+  const [myReviews, setMyReviews] = useState({ reviews: [], avgRating: 0, total: 0 })
+
+  useEffect(() => {
+    fetchReviews()
+  }, [])
+
+  const fetchReviews = async () => {
+    try {
+      const res = await axios.get('/reviews/my')
+      setMyReviews(res.data)
+    } catch {}
+  }
 
   const [form, setForm] = useState({
     fullName:          user?.fullName || '',
@@ -130,6 +143,45 @@ export default function CreatorProfile() {
                 </div>
               )}
             </div>
+
+            {/* Rating */}
+            <div className="mt-4 pt-4 border-t border-border text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                {[1,2,3,4,5].map(s => (
+                  <span key={s} className={`text-lg ${s <= Math.round(myReviews.avgRating) ? 'text-yellow-400' : 'text-gray-300'}`}>
+                    ★
+                  </span>
+                ))}
+              </div>
+              <p className="text-sm font-bold text-secondary">
+                {myReviews.avgRating} / 5
+              </p>
+              <p className="text-xs text-muted">{myReviews.total} reviews</p>
+            </div>
+
+            {/* Reviews List */}
+            {myReviews.reviews.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <h4 className="text-sm font-bold text-secondary mb-3">Recent Reviews</h4>
+                <div className="space-y-3 max-h-48 overflow-y-auto">
+                  {myReviews.reviews.map(r => (
+                    <div key={r._id} className="bg-surface rounded-xl p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-bold text-secondary">
+                          {r.brandId?.brandName || r.brandId?.fullName}
+                        </p>
+                        <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <span key={s} className={`text-sm ${s <= r.rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted">{r.review}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

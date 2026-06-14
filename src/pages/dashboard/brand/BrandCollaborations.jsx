@@ -6,13 +6,25 @@ import socket from '../../../utils/socket'
 import { useAuth } from '../../../context/AuthContext'
 import { Link } from 'react-router-dom'
 
-const statusColors = {
-  payment_pending: 'bg-gray-100 text-gray-600',
-  active:          'bg-blue-50 text-blue-700',
-  submitted:       'bg-yellow-50 text-yellow-700',
-  completed:       'bg-green-50 text-green-700',
-  revision:        'bg-orange-50 text-orange-700',
-  cancelled:       'bg-red-50 text-red-600',
+// ⭐ Star Rating Component
+const StarRating = ({ rating, setRating, readonly = false }) => {
+  const [hover, setHover] = useState(0)
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map(star => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => !readonly && setRating(star)}
+          onMouseEnter={() => !readonly && setHover(star)}
+          onMouseLeave={() => !readonly && setHover(0)}
+          className={`text-2xl transition-colors ${readonly ? 'cursor-default' : 'cursor-pointer'}`}
+        >
+          {star <= (hover || rating) ? '⭐' : '☆'}
+        </button>
+      ))}
+    </div>
+  )
 }
 
 export default function BrandCollaborations() {
@@ -24,56 +36,47 @@ export default function BrandCollaborations() {
   const [newMsg, setNewMsg]                 = useState('')
   const [revisionModal, setRevisionModal]   = useState(null)
   const [revisionNote, setRevisionNote]     = useState('')
+  const [reviewModal, setReviewModal]       = useState(null)  // ← New
+  const [rating, setRating]                 = useState(5)      // ← New
+  const [reviewText, setReviewText]         = useState('')     // ← New
+  const [submittingReview, setSubmittingReview] = useState(false) // ← New
   const [toast, setToast]                   = useState('')
   const messagesEndRef                      = useRef(null)
 
-useEffect(() => {
-  fetchCollaborations()
-
-  socket.on('new_notification', () => {
+  useEffect(() => {
     fetchCollaborations()
-  })
-
-  socket.on('collaboration_updated', (data) => {
-    console.log('collaboration_updated received:', data)
-
-    setCollaborations(prev => prev.map(c =>
-      c._id.toString() === data.collaborationId.toString()
-        ? { ...c, chatUnlocked: data.chatUnlocked, status: data.status }
-        : c
-    ))
-
-    setSelected(prev => {
-      if (!prev) return prev
-      if (prev._id.toString() === data.collaborationId.toString()) {
-        return { ...prev, chatUnlocked: data.chatUnlocked, status: data.status }
-      }
-      return prev
+    socket.on('new_notification', fetchCollaborations)
+    socket.on('collaboration_updated', (data) => {
+      setCollaborations(prev => prev.map(c =>
+        c._id.toString() === data.collaborationId.toString()
+          ? { ...c, chatUnlocked: data.chatUnlocked, status: data.status }
+          : c
+      ))
+      setSelected(prev => {
+        if (!prev) return prev
+        if (prev._id.toString() === data.collaborationId.toString()) {
+          return { ...prev, chatUnlocked: data.chatUnlocked, status: data.status }
+        }
+        return prev
+      })
     })
-  })
+    return () => {
+      socket.off('new_notification')
+      socket.off('collaboration_updated')
+    }
+  }, [])
 
-  return () => {
-    socket.off('new_notification')
-    socket.off('collaboration_updated')
-  }
-}, [])
   useEffect(() => {
     if (!selected) return
     if (selected.chatUnlocked) fetchMessages(selected._id)
     socket.emit('join_collaboration', selected._id)
- socket.on('new_message', (msg) => {
-  setMessages(prev => {
-    // ✅ ID se duplicate check
-    if (prev.some(m => m._id?.toString() === msg._id?.toString())) {
-      return prev
-    }
-    return [...prev, msg]
-  })
-  // ✅ Auto scroll
-  setTimeout(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, 50)
-})
+    socket.on('new_message', (msg) => {
+      setMessages(prev => {
+        if (prev.some(m => m._id?.toString() === msg._id?.toString())) return prev
+        return [...prev, msg]
+      })
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+    })
     return () => { socket.off('new_message') }
   }, [selected])
 
@@ -85,6 +88,11 @@ useEffect(() => {
     try {
       const res = await axios.get('/collaborations/brand')
       setCollaborations(res.data)
+      setSelected(prev => {
+        if (!prev) return prev
+        const updated = res.data.find(c => c._id === prev._id)
+        return updated || prev
+      })
     } catch {
       setCollaborations([])
     } finally {
@@ -116,33 +124,35 @@ useEffect(() => {
   }
 
   const handleSendMsg = async (e) => {
-  e.preventDefault()
-  if (!newMsg.trim()) return
-
-  const msgText = newMsg
-  setNewMsg('') // ✅ Pehle clear karo — instant feel
-
-  try {
-    await axios.post(`/messages/${selected._id}`, { message: msgText })
-    // Socket se message aayega — manually add mat karo
-  } catch (err) {
-    setNewMsg(msgText) // ✅ Error pe wapis restore karo
-    showToast(err.response?.data?.message || 'Failed to send message')
+    e.preventDefault()
+    if (!newMsg.trim()) return
+    const msgText = newMsg
+    setNewMsg('')
+    try {
+      await axios.post(`/messages/${selected._id}`, { message: msgText })
+    } catch (err) {
+      setNewMsg(msgText)
+      showToast(err.response?.data?.message || 'Failed to send message')
+    }
   }
-}
- const handleApprove = async (id) => {
-  try {
-    await axios.put(`/collaborations/${id}/approve`)
-    setCollaborations(prev => prev.map(c =>
-      c._id === id ? { ...c, status: 'completed' } : c
-    ))
-    if (selected?._id === id) setSelected(prev => ({ ...prev, status: 'completed' }))
-    showToast('✅ Work approved! Admin will release payment soon.')
-  } catch (err) {
-    showToast(err.response?.data?.message || 'Failed to approve')
-    console.error('Approve error:', err.response?.data)  // ← ye add karo
+
+  const handleApprove = async (id) => {
+    try {
+      const res = await axios.put(`/collaborations/${id}/approve`)
+      setCollaborations(prev => prev.map(c =>
+        c._id === id ? { ...c, status: 'completed' } : c
+      ))
+      if (selected?._id === id) setSelected(prev => ({ ...prev, status: 'completed' }))
+      showToast('✅ Work approved! Payment will be released soon.')
+
+      // ✅ Review modal kholo
+      const collab = collaborations.find(c => c._id === id)
+      if (collab) setReviewModal(collab)
+
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to approve')
+    }
   }
-}
 
   const handleRevision = async () => {
     if (!revisionNote.trim()) return
@@ -162,6 +172,36 @@ useEffect(() => {
     }
   }
 
+  // ✅ Review submit
+  const handleReviewSubmit = async () => {
+    if (!reviewText.trim()) return showToast('Please write a review')
+    setSubmittingReview(true)
+    try {
+      await axios.post('/reviews', {
+        collaborationId: reviewModal._id,
+        rating,
+        review: reviewText,
+      })
+      showToast('⭐ Review submitted successfully!')
+      setReviewModal(null)
+      setRating(5)
+      setReviewText('')
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to submit review')
+    } finally {
+      setSubmittingReview(false)
+    }
+  }
+
+  const statusColors = {
+    payment_pending: 'bg-gray-100 text-gray-600',
+    active:          'bg-blue-50 text-blue-700',
+    submitted:       'bg-yellow-50 text-yellow-700',
+    completed:       'bg-green-50 text-green-700',
+    revision:        'bg-orange-50 text-orange-700',
+    cancelled:       'bg-red-50 text-red-600',
+  }
+
   return (
     <DashboardLayout links={brandLinks}>
 
@@ -177,9 +217,6 @@ useEffect(() => {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-purple">
             <h3 className="font-bold text-secondary text-lg mb-1">Request Revision</h3>
-            <p className="text-sm text-muted mb-2">
-              for: <span className="font-semibold text-secondary">{revisionModal.creatorId?.fullName}</span>
-            </p>
             <p className="text-sm text-muted mb-5">Explain what changes are needed.</p>
             <textarea
               rows={4} placeholder="Describe the revision needed..."
@@ -195,6 +232,63 @@ useEffect(() => {
                 className="flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors">
                 Send Revision
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ Review Modal */}
+      {reviewModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-purple overflow-hidden">
+            <div className="bg-gradient-to-r from-primary to-primary-dark p-5">
+              <h3 className="font-black text-white text-lg">Rate This Creator ⭐</h3>
+              <p className="text-purple-200 text-sm mt-1">
+                How was your experience with {reviewModal.creatorId?.fullName}?
+              </p>
+            </div>
+            <div className="p-6 space-y-4">
+
+              {/* Stars */}
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-3">
+                  Your Rating
+                </label>
+                <StarRating rating={rating} setRating={setRating} />
+                <p className="text-xs text-muted mt-2">
+                  {rating === 1 ? 'Poor' : rating === 2 ? 'Fair' : rating === 3 ? 'Good' : rating === 4 ? 'Very Good' : 'Excellent'}
+                </p>
+              </div>
+
+              {/* Review Text */}
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-1.5">
+                  Write a Review
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Share your experience with this creator..."
+                  value={reviewText}
+                  onChange={e => setReviewText(e.target.value)}
+                  className="w-full px-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setReviewModal(null); setRating(5); setReviewText('') }}
+                  className="flex-1 py-2.5 border-2 border-border text-muted rounded-xl text-sm font-semibold hover:border-primary hover:text-primary transition-colors"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={handleReviewSubmit}
+                  disabled={submittingReview || !reviewText.trim()}
+                  className="flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
+                >
+                  {submittingReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -256,17 +350,13 @@ useEffect(() => {
                   <span>📱 {c.opportunityId?.platform}</span>
                 </div>
 
-                {/* Payment Pending */}
                 {c.status === 'payment_pending' && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-3">
                     <p className="text-xs font-bold text-yellow-700">💳 Payment Required</p>
-                    <p className="text-xs text-yellow-600 mt-0.5">
-                      Complete payment to unlock collaboration and chat.
-                    </p>
+                    <p className="text-xs text-yellow-600 mt-0.5">Complete payment to unlock collaboration.</p>
                   </div>
                 )}
 
-                {/* Submitted Work */}
                 {c.status === 'submitted' && c.submittedWork && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-3">
                     <p className="text-xs font-bold text-yellow-700">Work Submitted:</p>
@@ -274,7 +364,6 @@ useEffect(() => {
                   </div>
                 )}
 
-                {/* Completed */}
                 {c.status === 'completed' && (
                   <div className={`rounded-lg px-3 py-2 mb-3 ${
                     c.paymentStatus === 'released'
@@ -293,18 +382,14 @@ useEffect(() => {
 
                 <div className="flex gap-2">
                   {c.status === 'payment_pending' ? (
-                    <Link
-                      to="/brand/payments"
-                      onClick={e => e.stopPropagation()}
-                      className="flex-1 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-dark transition-colors text-center"
-                    >
+                    <Link to="/brand/payments" onClick={e => e.stopPropagation()}
+                      className="flex-1 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-dark transition-colors text-center">
                       💳 Pay Now
                     </Link>
                   ) : (
                     <button
                       onClick={e => { e.stopPropagation(); handleSelectCollaboration(c) }}
-                      className="flex-1 py-2 bg-primary-light text-primary text-xs font-bold rounded-xl hover:bg-primary hover:text-white transition-colors"
-                    >
+                      className="flex-1 py-2 bg-primary-light text-primary text-xs font-bold rounded-xl hover:bg-primary hover:text-white transition-colors">
                       💬 Chat
                     </button>
                   )}
@@ -312,17 +397,23 @@ useEffect(() => {
                     <>
                       <button
                         onClick={e => { e.stopPropagation(); handleApprove(c._id) }}
-                        className="flex-1 py-2 bg-green-500 text-white text-xs font-bold rounded-xl hover:bg-green-600 transition-colors"
-                      >
+                        className="flex-1 py-2 bg-green-500 text-white text-xs font-bold rounded-xl hover:bg-green-600 transition-colors">
                         ✅ Approve
                       </button>
                       <button
                         onClick={e => { e.stopPropagation(); setRevisionModal(c) }}
-                        className="flex-1 py-2 border border-orange-300 text-orange-600 text-xs font-bold rounded-xl hover:bg-orange-50 transition-colors"
-                      >
+                        className="flex-1 py-2 border border-orange-300 text-orange-600 text-xs font-bold rounded-xl hover:bg-orange-50 transition-colors">
                         🔄 Revision
                       </button>
                     </>
+                  )}
+                  {/* ✅ Review button agar completed aur review nahi diya */}
+                  {c.status === 'completed' && (
+                    <button
+                      onClick={e => { e.stopPropagation(); setReviewModal(c) }}
+                      className="flex-1 py-2 bg-yellow-400 text-white text-xs font-bold rounded-xl hover:bg-yellow-500 transition-colors">
+                      ⭐ Review
+                    </button>
                   )}
                 </div>
               </div>
@@ -332,8 +423,6 @@ useEffect(() => {
           {/* Chat Panel */}
           {selected ? (
             <div className="bg-card rounded-2xl border border-border shadow-card flex flex-col h-[600px] sticky top-24">
-
-              {/* Header */}
               <div className="p-4 border-b border-border flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary font-bold flex-shrink-0">
                   {selected.creatorId?.fullName?.[0] || 'C'}
@@ -352,21 +441,14 @@ useEffect(() => {
                 </span>
               </div>
 
-              {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
-
-                {/* Chat Locked */}
                 {!selected.chatUnlocked ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     <div className="text-5xl mb-3">💳</div>
                     <p className="font-bold text-secondary">Payment Required</p>
-                    <p className="text-xs text-muted mt-2 max-w-xs">
-                      Complete payment to unlock this chat and start collaborating.
-                    </p>
-                    <Link
-                      to="/brand/payments"
-                      className="mt-4 px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors"
-                    >
+                    <p className="text-xs text-muted mt-2 max-w-xs">Complete payment to unlock chat.</p>
+                    <Link to="/brand/payments"
+                      className="mt-4 px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors">
                       Pay Now →
                     </Link>
                   </div>
@@ -387,9 +469,7 @@ useEffect(() => {
                         }`}>
                           <p className="break-words">{msg.message}</p>
                           <p className={`text-xs mt-1 ${isMe ? 'text-purple-200' : 'text-muted'}`}>
-                            {new Date(msg.createdAt).toLocaleTimeString('en-PK', {
-                              hour: '2-digit', minute: '2-digit'
-                            })}
+                            {new Date(msg.createdAt).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
                       </div>
@@ -399,14 +479,11 @@ useEffect(() => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
               {!selected.chatUnlocked ? (
                 <div className="p-4 border-t border-border">
                   <div className="flex items-center gap-2 px-4 py-3 bg-yellow-50 rounded-xl border border-yellow-200">
                     <span>💳</span>
-                    <p className="text-sm text-yellow-700 font-medium">
-                      Complete payment to unlock chat
-                    </p>
+                    <p className="text-sm text-yellow-700 font-medium">Complete payment to unlock chat</p>
                   </div>
                 </div>
               ) : (
@@ -416,11 +493,8 @@ useEffect(() => {
                     value={newMsg} onChange={e => setNewMsg(e.target.value)}
                     className="flex-1 px-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
                   />
-                  <button
-                    type="submit"
-                    disabled={!newMsg.trim()}
-                    className="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
+                  <button type="submit" disabled={!newMsg.trim()}
+                    className="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50">
                     Send
                   </button>
                 </form>
