@@ -24,6 +24,8 @@ export default function ActiveCollaborations() {
   const [newMsg, setNewMsg]                 = useState('')
   const [submitModal, setSubmitModal]       = useState(null)
   const [workLink, setWorkLink]             = useState('')
+  const [disputeModal, setDisputeModal]     = useState(null)
+  const [disputeReason, setDisputeReason]   = useState('')
   const [toast, setToast]                   = useState('')
   const messagesEndRef                      = useRef(null)
 
@@ -170,6 +172,26 @@ useEffect(() => {
     }
   }
 
+  const handleRaiseDispute = (c) => {
+    setDisputeModal(c)
+  }
+
+  const handleDisputeSubmit = async () => {
+    if (!disputeReason.trim()) return showToast('Please explain the issue')
+    try {
+      await axios.post('/disputes', {
+        collaborationId: disputeModal._id,
+        reason: disputeReason,
+      })
+      showToast('⚖️ Dispute filed. Admin will review shortly.')
+      setDisputeModal(null)
+      setDisputeReason('')
+      fetchCollaborations()
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to file dispute')
+    }
+  }
+
   return (
     <DashboardLayout links={creatorLinks}>
 
@@ -205,6 +227,35 @@ useEffect(() => {
               <button onClick={handleSubmitWork}
                 className="flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors">
                 Submit Work
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ⚖️ Dispute Modal */}
+      {disputeModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-purple">
+            <h3 className="font-bold text-secondary text-lg mb-1">⚖️ File a Dispute</h3>
+            <p className="text-sm text-muted mb-5">
+              for: {disputeModal.opportunityId?.title}
+            </p>
+            <textarea
+              rows={4}
+              placeholder="Explain the issue clearly. Admin will review and make a decision..."
+              value={disputeReason}
+              onChange={e => setDisputeReason(e.target.value)}
+              className="w-full px-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary resize-none mb-4"
+            />
+            <div className="flex gap-3">
+              <button onClick={() => { setDisputeModal(null); setDisputeReason('') }}
+                className="flex-1 py-2.5 border-2 border-border text-muted rounded-xl text-sm font-semibold">
+                Cancel
+              </button>
+              <button onClick={handleDisputeSubmit}
+                className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-colors">
+                File Dispute
               </button>
             </div>
           </div>
@@ -327,6 +378,15 @@ useEffect(() => {
                       title="Delete collaboration"
                     >
                       🗑️
+                    </button>
+                  )}
+                  {(c.status === 'active' || c.status === 'submitted') && (
+                    <button
+                      onClick={e => { e.stopPropagation(); handleRaiseDispute(c) }}
+                      className="py-2 px-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl hover:bg-red-100 transition-colors"
+                      title="Raise Dispute"
+                    >
+                      ⚖️
                     </button>
                   )}
                 </div>

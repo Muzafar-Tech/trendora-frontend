@@ -38,17 +38,17 @@ const handleSubmit = async (e) => {
 
   setLoading(true)
   try {
-    // ✅ axios import karo ya register use karo
-    const axiosInstance = (await import('../../utils/axios')).default
-    const res = await axiosInstance.post('/auth/register', { role, ...form })
+    const res = await axios.post('/auth/register', { role, ...form })
+
+    // ✅ Verification page par bhejo
     navigate('/verify-email', { state: { userId: res.data.userId } })
+
   } catch (err) {
     setError(err.response?.data?.message || 'Registration failed.')
   } finally {
     setLoading(false)
   }
 }
-
   return (
     <div className="min-h-screen flex">
 
