@@ -355,23 +355,14 @@ export default function DashboardLayout({ children, links }) {
     })
 
     // ✅ WhatsApp style message notification
-    socket.on('message_notification', (data) => {
-      // Agar already us collaboration ke chat mein hai to show mat karo
-      const currentPath = window.location.pathname
-      const isChatPage  = currentPath.includes('collaborations')
-
-      if (!isChatPage) {
-        // ✅ Toast show karo
-        setMsgToast(data)
-        playNotificationSound()
-
-        // 4 second baad hide karo
-        setTimeout(() => setMsgToast(null), 4000)
-
-        // Bell mein bhi add karo
-        setUnreadCount(prev => prev + 1)
-      }
-    })
+ socket.on('message_notification', (data) => {
+  // ✅ Hamesha show karo — chat page pe bhi
+  // Sirf agar same collaboration mein nahi hai
+  setMsgToast(data)
+  playNotificationSound()
+  setTimeout(() => setMsgToast(null), 5000)
+  setUnreadCount(prev => prev + 1)
+})
 
     return () => {
       socket.off('new_notification')

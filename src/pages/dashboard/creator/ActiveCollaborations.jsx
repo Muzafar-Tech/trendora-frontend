@@ -50,35 +50,31 @@ useEffect(() => {
   }
 }, [])
   // ─── Selected Change ─────────────────────────────
-  useEffect(() => {
-    if (!selected) return
+useEffect(() => {
+  if (!selected) return
 
-    // Sirf active collaboration mein messages fetch karo
-    if (selected.chatUnlocked) {
-      fetchMessages(selected._id)
-    }
+  if (selected.chatUnlocked) {
+    fetchMessages(selected._id)
+  }
 
-    socket.emit('join_collaboration', selected._id)
+  socket.emit('join_collaboration', selected._id)
 
+  // ✅ Remove old listener pehle
+  socket.off('new_message')
   socket.on('new_message', (msg) => {
-  setMessages(prev => {
-    // ✅ ID se duplicate check
-    if (prev.some(m => m._id?.toString() === msg._id?.toString())) {
-      return prev
-    }
-    return [...prev, msg]
+    setMessages(prev => {
+      if (prev.some(m => m._id?.toString() === msg._id?.toString())) return prev
+      return [...prev, msg]
+    })
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 50)
   })
-  // ✅ Auto scroll
-  setTimeout(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, 50)
-})
 
-    return () => {
-      socket.off('new_message')
-    }
-  }, [selected])
-
+  return () => {
+    socket.off('new_message')
+  }
+}, [selected?._id])  // ← selected._id pe depend karo, pura object nahi
   // ─── Auto Scroll ─────────────────────────────────
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -95,20 +91,31 @@ useEffect(() => {
     }
   }
 
-  const fetchMessages = async (id) => {
-    try {
-      // ✅ Join collaboration room first
-      await axios.post(`/messages/${id}/join`)
+  // const fetchMessages = async (id) => {
+  //   try {
+  //     // ✅ Join collaboration room first
+  //     await axios.post(`/messages/${id}/join`)
       
-      // ✅ Fetch messages with pagination (page 1, 50 messages)
-      const res = await axios.get(`/messages/${id}?page=1&limit=50`)
-      setMessages(res.data.messages || res.data)
-    } catch (err) {
-      console.error('fetchMessages error:', err.message)
-      setMessages([])
-    }
-  }
+  //     // ✅ Fetch messages with pagination (page 1, 50 messages)
+  //     const res = await axios.get(`/messages/${id}?page=1&limit=50`)
+  //     setMessages(res.data.messages || res.data)
+  //   } catch (err) {
+  //     console.error('fetchMessages error:', err.message)
+  //     setMessages([])
+  //   }
+  // }
 
+
+  const fetchMessages = async (id) => {
+  try {
+    // ✅ Sirf ek call — no join needed
+    const res = await axios.get(`/messages/${id}`)
+    setMessages(Array.isArray(res.data) ? res.data : res.data.messages || [])
+  } catch (err) {
+    console.error('fetchMessages error:', err)
+    setMessages([])
+  }
+}
   const showToast = (msg) => {
     setToast(msg)
     setTimeout(() => setToast(''), 3000)
