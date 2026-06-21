@@ -10,40 +10,37 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-const initAuth = async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    setLoading(false)
-    return
-  }
-  try {
-    const res = await axios.get('/auth/me')
-    setUser(res.data)
-    socket.connect()
-    socket.on('connect', () => {
-      socket.emit('join', res.data._id.toString())
-    })
-    if (socket.connected) {
-      socket.emit('join', res.data._id.toString())
+    const initAuth = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        setLoading(false)
+        return
+      }
+      try {
+        const res = await axios.get('/auth/me')
+        setUser(res.data)
+        socket.connect()
+        socket.on('connect', () => {
+          socket.emit('join', res.data._id.toString())
+        })
+        if (socket.connected) {
+          socket.emit('join', res.data._id.toString())
+        }
+      } catch (err) {
+        if (err.response?.data?.isBanned) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          setUser(null)
+          localStorage.setItem('bannedMessage', 'Your account has been banned. Contact support.')
+        } else {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          setUser(null)
+        }
+      } finally {
+        setLoading(false)
+      }
     }
-  } catch (err) {
-    // ✅ Banned user — logout karo
-    if (err.response?.data?.isBanned) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      setUser(null)
-      // Banned message show karne ke liye
-      localStorage.setItem('bannedMessage', 'Your account has been banned.')
-    } else {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      setUser(null)
-    }
-  } finally {
-    setLoading(false)
-  }
-}
-
     initAuth()
   }, [])
 
@@ -53,20 +50,23 @@ const initAuth = async () => {
     localStorage.setItem('user', JSON.stringify(res.data))
     setUser(res.data)
     socket.connect()
-    socket.emit('join', res.data._id)
-      await requestPermission()
-
+    socket.emit('join', res.data._id.toString())  // ← .toString() add karo
+    await requestPermission()                      // ← await sahi jagah
     return res.data
   }
 
+  // ✅ Register mein token nahi aata — sirf userId aata hai
+  // Register ke baad verify-email pe redirect hota hai
   const register = async (formData) => {
     const res = await axios.post('/auth/register', formData)
-    localStorage.setItem('token', res.data.token)
-    localStorage.setItem('user', JSON.stringify(res.data))
-    setUser(res.data)
-    socket.connect()
-    socket.emit('join', res.data._id)
-    return res.data
+    return res.data  // ← sirf data return karo, login mat karo
+  }
+
+  // ✅ updateUser function add karo — profile update ke liye
+  const updateUser = (updatedData) => {
+    const newUser = { ...user, ...updatedData }
+    setUser(newUser)
+    localStorage.setItem('user', JSON.stringify(newUser))
   }
 
   const logout = () => {
@@ -77,7 +77,7 @@ const initAuth = async () => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

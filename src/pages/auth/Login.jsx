@@ -2,8 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import authBg from '../../assets/auth-bg.jpeg'
-import { useState, useEffect } from 'react'
-
 export default function Login() {
   const [email, setEmail]     = useState('')
   const [password, setPassword] = useState('')
