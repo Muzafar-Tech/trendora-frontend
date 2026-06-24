@@ -60,14 +60,16 @@ export default function Signup() {
     }
   };
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen lg:h-screen flex lg:overflow-hidden">
       {/* LEFT SIDE — Background Image */}
       <div
-        className="hidden lg:flex w-1/2 relative "
+        className="hidden lg:flex w-[55%] h-screen relative bg-[#F5F2FA]"
         style={{
           backgroundImage: `url(${authBg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "55% center",
+
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "130%",
+          backgroundPosition: "center center",
         }}
       >
         {/* <div className="absolute inset-0 bg-primary/60" /> */}
@@ -108,8 +110,8 @@ export default function Signup() {
       </div>
 
       {/* RIGHT SIDE — Signup Form */}
-      <div className="w-full lg:w-[50%] flex items-center justify-center px-6 py-12 bg-[#F5F2FA] overflow-y-auto">
-        <div className="w-full max-w-2xl my-6">
+      <div className="w-full lg:w-[50%] flex items-center justify-center px-6 py-2 bg-[#F5F2FA] overflow-hidden">
+        <div className="w-full max-w-2xl lg:scale-[0.74] xl:scale-[0.8] scale-100 origin-center">
           {/* Mobile Logo */}
           <div className="flex lg:hidden justify-center mb-8">
             <Link
@@ -119,7 +121,7 @@ export default function Signup() {
               <img
                 src={navbarLogo}
                 alt="Trendora Logo"
-                className="w-12 h-12 object-contain"
+                className="w-12 h-13 object-contain"
               />
               <span className="text-2xl font-extrabold tracking-tight text-purple-700">
                 Trendora
@@ -132,9 +134,8 @@ export default function Signup() {
             className="
   bg-white
   rounded-[32px]
-  p-8
-  md:p-10
-  border
+  p-6
+  md:p-8
   border-purple-100
   shadow-[0_25px_80px_rgba(124,58,237,0.12)]
 "
@@ -176,7 +177,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setRole("creator")}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border-2 transition-all ${
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${
                     role === "creator"
                       ? "bg-primary text-white border-primary shadow-purple"
                       : "bg-surface text-muted border-border hover:border-primary hover:text-primary"
@@ -189,7 +190,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setRole("brand")}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border-2 transition-all ${
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${
                     role === "brand"
                       ? "bg-primary text-white border-primary shadow-purple"
                       : "bg-surface text-muted border-border hover:border-primary hover:text-primary"
@@ -203,7 +204,7 @@ export default function Signup() {
 
             {/* Error */}
             {error && (
-              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl flex items-center gap-2">
+              <div className="mb-4 px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl flex items-center gap-2">
                 <Icon
                   icon="solar:danger-triangle-bold"
                   className="text-lg flex-shrink-0"
@@ -232,7 +233,7 @@ export default function Signup() {
                       placeholder="Enter your full name"
                       value={form.fullName}
                       onChange={(e) => update("fullName", e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                      className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                     />
                   </div>
                 </div>
@@ -253,7 +254,7 @@ export default function Signup() {
                       placeholder="Enter your email address"
                       value={form.email}
                       onChange={(e) => update("email", e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                      className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                     />
                   </div>
                 </div>
@@ -276,7 +277,7 @@ export default function Signup() {
                       placeholder="Create a password"
                       value={form.password}
                       onChange={(e) => update("password", e.target.value)}
-                      className="w-full pl-10 pr-10 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                      className="w-full pl-10 pr-10 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                     />
                     <button
                       type="button"
@@ -309,7 +310,7 @@ export default function Signup() {
                       onChange={(e) =>
                         update("confirmPassword", e.target.value)
                       }
-                      className="w-full pl-10 pr-10 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                      className="w-full pl-10 pr-10 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                     />
                     <button
                       type="button"
@@ -348,7 +349,7 @@ export default function Signup() {
                         onChange={(e) =>
                           update("socialPlatform", e.target.value)
                         }
-                        className="w-full pl-10 pr-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                       />
                     </div>
                   </div>
@@ -368,7 +369,7 @@ export default function Signup() {
                         onChange={(e) =>
                           update("socialProfileUrl", e.target.value)
                         }
-                        className="w-full pl-10 pr-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                       />
                     </div>
                   </div>
@@ -386,7 +387,7 @@ export default function Signup() {
                         placeholder="Enter your address"
                         value={form.address}
                         onChange={(e) => update("address", e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                       />
                     </div>
                   </div>
@@ -410,7 +411,7 @@ export default function Signup() {
                         placeholder="Enter your brand name"
                         value={form.brandName}
                         onChange={(e) => update("brandName", e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                       />
                     </div>
                   </div>
@@ -428,7 +429,7 @@ export default function Signup() {
                         placeholder="Enter your website URL"
                         value={form.websiteUrl}
                         onChange={(e) => update("websiteUrl", e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                       />
                     </div>
                   </div>
@@ -446,7 +447,7 @@ export default function Signup() {
                         placeholder="Enter your brand address"
                         value={form.brandAddress}
                         onChange={(e) => update("brandAddress", e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-surface"
                       />
                     </div>
                   </div>
@@ -483,7 +484,7 @@ export default function Signup() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl transition-colors shadow-purple text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl transition-colors shadow-purple text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? "Creating Account..." : "Create Account"}
               </button>
