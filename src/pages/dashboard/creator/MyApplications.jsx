@@ -82,31 +82,39 @@ export default function MyApplications() {
 
   // ✅ Withdraw with warning
   const handleWithdraw = async (id) => {
-    const withdrawnCount = applications.filter(
-      (a) => a.status === "withdrawn",
-    ).length;
-    const remaining = 2 - withdrawnCount;
+    // const withdrawnCount = applications.filter(
+    //   (a) => a.status === "withdrawn",
+    // ).length;
+    // const remaining = 2 - withdrawnCount;
 
-    if (withdrawnCount >= 2) {
-      if (
-        !window.confirm(
-          `⚠️ Warning: This is your 3rd withdrawal!\n\nAfter this you will be BANNED from applying for 7 days.\n\nAre you sure?`,
-        )
-      )
-        return;
-    } else {
-      if (
-        !window.confirm(
-          `Withdraw this application?\n\nNote: After ${remaining} more withdrawal(s) you will be temporarily banned.\n\nAre you sure?`,
-        )
-      )
-        return;
-    }
+    // if (withdrawnCount >= 2) {
+    //   if (
+    //     !window.confirm(
+    //       `⚠️ Warning: This is your 3rd withdrawal!\n\nAfter this you will be BANNED from applying for 7 days.\n\nAre you sure?`,
+    //     )
+    //   )
+    //     return;
+    // } else {
+    //   if (
+    //     !window.confirm(
+    //       `Withdraw this application?\n\nNote: After ${remaining} more withdrawal(s) you will be temporarily banned.\n\nAre you sure?`,
+    //     )
+    //   )
+    //     return;
+    // }
 
     try {
       const res = await axios.delete(`/applications/${id}`);
       setApplications((prev) =>
-        prev.map((a) => (a._id === id ? { ...a, status: "withdrawn" } : a)),
+        prev.map((a) =>
+          a._id === id
+            ? {
+                ...a,
+                status: "withdrawn",
+                withdrawnAt: new Date(),
+              }
+            : a,
+        ),
       );
       if (res.data.banned) {
         showToast(
@@ -217,9 +225,9 @@ export default function MyApplications() {
     }
   };
 
-  const withdrawnCount = applications.filter(
-    (a) => a.status === "withdrawn",
-  ).length;
+  // const withdrawnCount = applications.filter(
+  //   (a) => a.status === "withdrawn",
+  // ).length;
 
   return (
     <>
@@ -594,7 +602,7 @@ disabled:opacity-60
         </div>
 
         {/* ✅ Withdraw warning */}
-        {withdrawnCount > 0 && (
+        {/* {withdrawnCount > 0 && (
           <div
             className={`mt-3 px-4 py-3 rounded-xl text-sm flex items-center gap-2 ${
               withdrawnCount >= 2
@@ -614,7 +622,7 @@ disabled:opacity-60
                 : ` ${3 - withdrawnCount} more allowed before temporary ban.`}
             </span>
           </div>
-        )}
+        )} */}
 
         <div className="flex flex-col lg:flex-row gap-3 mt-6 mb-6">
           <div className="relative flex-1">
@@ -702,7 +710,7 @@ transition-all
               className="
 group
 
-bg-white
+bg-purple-100
 rounded-[28px]
 border
 border-purple-100

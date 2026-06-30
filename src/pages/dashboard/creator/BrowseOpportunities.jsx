@@ -622,7 +622,7 @@ transition-colors
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: i * 0.05 }}
               whileHover={{ y: -6, scale: 1.01 }}
-              className="bg-white rounded-3xl p-6 border border-purple-100 shadow-sm hover:shadow-xl hover:shadow-purple-100 transition-all duration-300 cursor-pointer"
+              className="bg-purple-100 rounded-3xl p-6 border border-purple-100 shadow-sm hover:shadow-xl hover:shadow-purple-100 transition-all duration-300 cursor-pointer"
               onClick={() => setExpanded(op)}
             >
               {/* Top Row */}

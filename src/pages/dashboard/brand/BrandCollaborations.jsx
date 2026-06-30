@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 // import DashboardLayout from "../shared/DashboardLayout";
 import { Icon } from "@iconify/react";
-import { brandLinks } from "./BrandDashboard";
+// import { brandLinks } from "./BrandDashboard";
 import axios from "../../../utils/axios";
 import socket from "../../../utils/socket";
 import { useAuth } from "../../../context/AuthContext";
@@ -499,7 +499,7 @@ export default function BrandCollaborations() {
                                 href={file.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                download={file.originalName} 
+                                download={file.originalName}
                                 className="text-xs text-purple-600 font-bold hover:underline flex items-center gap-1"
                               >
                                 <Icon icon="solar:download-bold" />
@@ -531,7 +531,7 @@ export default function BrandCollaborations() {
                                 href={file.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                download={file.originalName} 
+                                download={file.originalName}
                                 className="text-xs text-purple-600 font-bold hover:underline flex items-center gap-1"
                               >
                                 <Icon icon="solar:download-bold" />
@@ -624,31 +624,191 @@ export default function BrandCollaborations() {
         </div>
       )}
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-black text-secondary">
-          Active Collaborations
-        </h1>
-        <p className="text-muted text-sm mt-1">
-          Manage projects and chat with creators.
-        </p>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-8">
+        <div className="flex items-center gap-4">
+          <div
+            className="
+      w-16
+      h-16
+      rounded-[22px]
+
+      bg-gradient-to-br
+      from-primary
+      to-primary-dark
+
+      flex
+      items-center
+      justify-center
+
+      shadow-xl
+      shadow-primary/20
+      flex-shrink-0
+    "
+          >
+            <Icon
+              icon="solar:users-group-rounded-bold"
+              className="text-[30px] text-white"
+            />
+          </div>
+
+          <div>
+            <h1 className="text-3xl font-black text-secondary">
+              Active Collaborations
+            </h1>
+
+            <p className="text-muted text-sm mt-1 leading-6">
+              Manage creator projects, review submitted work and communicate in
+              real time.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div
+            className="
+      px-5
+      py-3
+
+      rounded-2xl
+
+      bg-purple-50
+
+      border
+      border-purple-100
+    "
+          >
+            <p className="text-xs font-semibold text-muted">
+              Total Collaborations
+            </p>
+
+            <h3 className="text-2xl font-black text-primary mt-1">
+              {collaborations.length}
+            </h3>
+          </div>
+        </div>
       </div>
 
       {loading ? (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
+        <div className="space-y-5">
+          {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="h-24 bg-card rounded-2xl border border-border animate-pulse"
-            />
+              className="
+          bg-card
+          border
+          border-border
+          rounded-[30px]
+          p-5
+          animate-pulse
+        "
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-purple-100" />
+
+                <div className="flex-1">
+                  <div className="h-5 w-52 bg-purple-100 rounded-lg mb-3" />
+
+                  <div className="h-4 w-36 bg-purple-50 rounded-lg" />
+                </div>
+
+                <div className="w-24 h-8 rounded-full bg-purple-100" />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 mt-5">
+                <div className="h-20 rounded-2xl bg-purple-50" />
+
+                <div className="h-20 rounded-2xl bg-blue-50" />
+
+                <div className="h-20 rounded-2xl bg-green-50" />
+              </div>
+
+              <div className="flex gap-3 mt-5">
+                <div className="flex-1 h-11 rounded-xl bg-purple-100" />
+
+                <div className="flex-1 h-11 rounded-xl bg-purple-50" />
+              </div>
+            </div>
           ))}
         </div>
       ) : collaborations.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border shadow-card p-6 text-center py-16">
-          <div className="text-5xl mb-3">🤝</div>
-          <p className="font-medium text-secondary">No collaborations yet</p>
-          <p className="text-muted text-sm mt-1">
-            Accept creator applications to start collaborating.
-          </p>
+        <div
+          className="
+bg-card
+border
+border-border
+rounded-[30px]
+shadow-card
+
+py-20
+px-8
+"
+        >
+          <div className="max-w-md mx-auto text-center">
+            <div
+              className="
+      w-24
+      h-24
+
+      rounded-[28px]
+
+      bg-gradient-to-br
+      from-purple-100
+      via-purple-50
+      to-white
+
+      flex
+      items-center
+      justify-center
+
+      mx-auto
+
+      shadow-lg
+      shadow-purple-100
+    "
+            >
+              <Icon
+                icon="solar:handshake-bold"
+                className="text-[48px] text-primary"
+              />
+            </div>
+
+            <h2 className="mt-7 text-2xl font-black text-secondary">
+              No Collaborations Yet
+            </h2>
+
+            <p className="mt-3 text-sm text-muted leading-7">
+              Accept creator applications to start collaborating. Once a
+              collaboration is created, it will appear here.
+            </p>
+
+            <Link
+              to="/brand/applications"
+              className="
+        inline-flex
+        items-center
+        gap-2
+
+        mt-8
+
+        px-6
+        py-3
+
+        rounded-2xl
+
+        bg-primary
+        text-white
+
+        font-bold
+
+        hover:bg-primary-dark
+
+        transition-all
+      "
+            >
+              <Icon icon="solar:users-group-rounded-bold" />
+              Review Applications
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

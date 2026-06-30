@@ -345,7 +345,7 @@ export default function TrendingCreators() {
 group
 relative
 overflow-hidden
-bg-white
+bg-purple-100
 rounded-3xl
 p-6
 border

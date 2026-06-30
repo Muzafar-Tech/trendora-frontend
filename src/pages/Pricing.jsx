@@ -196,7 +196,7 @@ export default function Pricing() {
 group
 relative
 overflow-visible
-bg-white
+bg-purple-100
 rounded-3xl
 p-7
 border

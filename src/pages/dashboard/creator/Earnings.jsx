@@ -117,7 +117,7 @@ export default function Earnings() {
         ].map((s, i) => (
           <div
             key={i}
-            className="bg-white rounded-[30px] p-6 border border-purple-100 shadow-sm hover:shadow-xl hover:shadow-purple-100 hover:-translate-y-1 transition-all duration-300"
+            className="bg-purple-100 rounded-[30px] p-6 border border-purple-100 shadow-sm hover:shadow-xl hover:shadow-purple-100 hover:-translate-y-1 transition-all duration-300"
           >
             <div
               className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${s.color}`}
@@ -179,7 +179,7 @@ export default function Earnings() {
               <div
                 key={p._id}
                 className="
-      bg-white
+      bg-purple-100
       rounded-[30px]
       border
       border-purple-100

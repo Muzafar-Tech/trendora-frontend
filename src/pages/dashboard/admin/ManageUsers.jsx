@@ -62,7 +62,14 @@ export default function ManageUsers() {
     const matchSearch =
       u.fullName?.toLowerCase().includes(search.toLowerCase()) ||
       u.email?.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "all" || u.role === filter;
+    const matchFilter =
+      filter === "all"
+        ? true
+        : filter === "active"
+          ? !u.isBanned
+          : filter === "banned"
+            ? u.isBanned
+            : u.role === filter;
     return matchSearch && matchFilter;
   });
 
@@ -75,39 +82,96 @@ export default function ManageUsers() {
         </div>
       )}
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-black text-secondary">All Users</h1>
-        <p className="text-muted text-sm mt-1">
-          Manage creators, brands, and admins.
-        </p>
-      </div>
+      <div className="mb-8 flex items-start gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-purple-200">
+          <Icon
+            icon="solar:users-group-rounded-bold"
+            className="text-white text-3xl"
+          />
+        </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="Search by name or email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2.5 text-sm border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light bg-white"
-        />
-        <div className="flex gap-2">
-          {["all", "creator", "brand", "admin"].map((r) => (
-            <button
-              key={r}
-              onClick={() => setFilter(r)}
-              className={`px-3 py-2 text-xs font-semibold rounded-lg capitalize transition-colors ${
-                filter === r
-                  ? "bg-primary text-white"
-                  : "bg-white border border-border text-muted hover:border-primary hover:text-primary"
-              }`}
-            >
-              {r}
-            </button>
-          ))}
+        <div>
+          <h1 className="text-4xl font-black text-secondary">All Users</h1>
+
+          <p className="text-muted text-lg mt-1">
+            Manage creators, brands and administrators.
+          </p>
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+          {/* Search */}
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="
+          w-full
+          h-14
+          rounded-2xl
+          border
+          border-purple-100
+          bg-white
+          px-5
+          text-sm
+          font-medium
+          placeholder:text-gray-400
+          transition-all
+          focus:outline-none
+          focus:border-primary
+          focus:ring-4
+          focus:ring-purple-100
+        "
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-wrap lg:flex-nowrap gap-3 lg:justify-end">
+            {["all", "creator", "brand", "admin", "active", "banned"].map(
+              (r) => (
+                <button
+                  key={r}
+                  onClick={() => setFilter(r)}
+                  className={`
+    h-12
+    px-6
+    rounded-2xl
+    font-bold
+    text-sm
+    whitespace-nowrap
+    transition-all
+    duration-300
+
+    ${
+      filter === r
+        ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg shadow-purple-200"
+        : "bg-white border border-purple-100 text-secondary hover:border-primary hover:text-primary"
+    }
+  `}
+                >
+                  {r === "all"
+                    ? "All"
+                    : r === "creator"
+                      ? "Creator"
+                      : r === "brand"
+                        ? "Brand"
+                        : r === "admin"
+                          ? "Admin"
+                          : r === "active"
+                            ? "Active"
+                            : r === "banned"
+                              ? "Banned"
+                              : r}
+                </button>
+              ),
+            )}
+          </div>
+        </div>
+      </div>
       {/* Users Table */}
       <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
         {loading ? (
@@ -123,83 +187,237 @@ export default function ManageUsers() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-5xl mb-3">👥</div>
-            <p className="font-medium text-secondary">No users found</p>
+          <div className="text-center py-20">
+            <div className="w-24 h-24 rounded-3xl bg-purple-50 border border-purple-100 flex items-center justify-center mx-auto shadow-sm mb-6">
+              <Icon
+                icon="solar:users-group-rounded-bold"
+                className="text-primary text-5xl"
+              />
+            </div>
+
+            <h3 className="text-2xl font-black text-secondary mb-2">
+              No Users Found
+            </h3>
+
+            <p className="text-muted text-sm max-w-sm mx-auto leading-7">
+              We couldn't find any users matching your current search or filter.
+              Try changing the search keywords or selecting a different role.
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-border">
             {/* Header */}
-            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-surface text-xs font-bold text-muted uppercase tracking-wide">
-              <div className="col-span-4">User</div>
-              <div className="col-span-2">Role</div>
-              <div className="col-span-3">Joined</div>
-              <div className="col-span-2">Status</div>
-              <div className="col-span-1">Action</div>
+            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-purple-50 border-b border-purple-100 text-xs font-bold text-secondary uppercase tracking-wider">
+              <div className="col-span-4 flex items-center gap-2">
+                <Icon icon="solar:user-bold" className="text-primary text-lg" />
+                <span>User</span>
+              </div>
+
+              <div className="col-span-2 flex items-center gap-2">
+                <Icon
+                  icon="solar:shield-user-bold"
+                  className="text-primary text-lg"
+                />
+                <span>Role</span>
+              </div>
+
+              <div className="col-span-3 flex items-center gap-2">
+                <Icon
+                  icon="solar:calendar-bold"
+                  className="text-primary text-lg"
+                />
+                <span>Joined</span>
+              </div>
+
+              <div className="col-span-2 flex items-center gap-2">
+                <Icon
+                  icon="solar:verified-check-bold"
+                  className="text-primary text-lg"
+                />
+                <span>Status</span>
+              </div>
+
+              <div className="col-span-1 flex items-center gap-2">
+                <Icon
+                  icon="solar:settings-bold"
+                  className="text-primary text-lg"
+                />
+                <span>Action</span>
+              </div>
             </div>
 
             {filtered.map((u, i) => (
               <div
                 key={u._id}
-                className="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 hover:bg-surface transition-colors items-center"
+                className="
+    grid
+    grid-cols-1
+    md:grid-cols-12
+    gap-4
+    px-6
+    py-5
+    items-center
+    hover:bg-purple-50/50
+    transition-all
+    duration-300
+  "
               >
                 {/* User */}
-                <div className="md:col-span-4 flex items-center gap-3">
+                <div className="md:col-span-4 flex items-center gap-4">
                   <div
-                    className={`w-10 h-10 rounded-xl bg-gradient-to-br ${avatarColors[i % avatarColors.length]} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}
+                    className={`
+        w-14
+        h-14
+        rounded-2xl
+        bg-gradient-to-br
+        ${avatarColors[i % avatarColors.length]}
+        flex
+        items-center
+        justify-center
+        text-white
+        font-black
+        text-lg
+        shadow-md
+        flex-shrink-0
+      `}
                   >
                     {u.fullName?.[0] || "U"}
                   </div>
+
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-secondary truncate">
+                    <p className="text-base font-black text-secondary truncate">
                       {u.fullName}
                     </p>
-                    <p className="text-xs text-muted truncate">{u.email}</p>
+
+                    <div className="flex items-center gap-2 text-sm text-muted mt-1">
+                      <Icon
+                        icon="solar:letter-bold"
+                        className="text-primary text-base flex-shrink-0"
+                      />
+
+                      <span className="truncate">{u.email}</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Role */}
+
                 <div className="md:col-span-2">
                   <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${roleColors[u.role]}`}
+                    className={`
+        inline-flex
+        items-center
+        gap-2
+        px-3
+        py-1.5
+        rounded-full
+        text-xs
+        font-bold
+        capitalize
+
+        ${
+          u.role === "creator"
+            ? "bg-blue-50 text-blue-700"
+            : u.role === "brand"
+              ? "bg-orange-50 text-orange-700"
+              : "bg-purple-50 text-primary"
+        }
+      `}
                   >
+                    <Icon
+                      icon={
+                        u.role === "creator"
+                          ? "solar:user-bold"
+                          : u.role === "brand"
+                            ? "solar:buildings-bold"
+                            : "solar:shield-user-bold"
+                      }
+                      className="text-sm"
+                    />
+
                     {u.role}
                   </span>
                 </div>
 
                 {/* Joined */}
-                <div className="md:col-span-3 text-xs text-muted">
-                  {new Date(u.createdAt).toLocaleDateString("en-PK", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+
+                <div className="md:col-span-3">
+                  <div className="flex items-center gap-2 text-sm text-muted">
+                    <Icon icon="solar:calendar-bold" className="text-primary" />
+
+                    {new Date(u.createdAt).toLocaleDateString("en-PK", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </div>
                 </div>
 
                 {/* Status */}
+
                 <div className="md:col-span-2">
                   <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      u.isBanned
-                        ? "bg-red-50 text-red-600"
-                        : "bg-green-50 text-green-700"
-                    }`}
+                    className={`
+        inline-flex
+        items-center
+        gap-2
+        px-3
+        py-1.5
+        rounded-full
+        text-xs
+        font-bold
+
+        ${u.isBanned ? "bg-red-50 text-red-600" : "bg-green-50 text-green-700"}
+      `}
                   >
+                    <Icon
+                      icon={
+                        u.isBanned
+                          ? "solar:user-block-bold"
+                          : "solar:verified-check-bold"
+                      }
+                      className="text-sm"
+                    />
+
                     {u.isBanned ? "Banned" : "Active"}
                   </span>
                 </div>
 
                 {/* Action */}
+
                 <div className="md:col-span-1">
                   {u.role !== "admin" && (
                     <button
                       onClick={() => setBanModal(u)}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-                        u.isBanned
-                          ? "bg-green-50 text-green-700 hover:bg-green-100"
-                          : "bg-red-50 text-red-600 hover:bg-red-100"
-                      }`}
+                      className={`
+          h-10
+          px-4
+          rounded-xl
+          font-bold
+          text-xs
+          transition-all
+          duration-300
+          inline-flex
+          items-center
+          justify-center
+          gap-2
+
+          ${
+            u.isBanned
+              ? "bg-green-50 text-green-700 hover:bg-green-100"
+              : "bg-red-50 text-red-600 hover:bg-red-100"
+          }
+        `}
                     >
+                      <Icon
+                        icon={
+                          u.isBanned
+                            ? "solar:user-check-bold"
+                            : "solar:user-block-bold"
+                        }
+                        className="text-base"
+                      />
+
                       {u.isBanned ? "Unban" : "Ban"}
                     </button>
                   )}

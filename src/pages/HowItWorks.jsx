@@ -219,7 +219,7 @@ export default function HowItWorks() {
                         className="
   group
   relative
-  bg-white
+  bg-purple-100
   p-7
   rounded-3xl
   border

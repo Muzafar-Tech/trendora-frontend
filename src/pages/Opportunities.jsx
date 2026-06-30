@@ -289,7 +289,7 @@ function OpportunityCard({ op, index }) {
     group
     relative
     overflow-hidden
-    bg-white
+    bg-purple-100
     rounded-3xl
     p-6
     border

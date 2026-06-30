@@ -209,7 +209,7 @@ export default function CreatorDashboard() {
         ].map((s, i) => (
           <div
             key={i}
-            className="bg-card rounded-2xl p-5 border border-border shadow-card hover:shadow-purple transition-all"
+            className="bg-purple-100 rounded-2xl p-5 border border-border shadow-card hover:shadow-purple transition-all"
           >
             <div
               className={`

@@ -9,32 +9,25 @@ import SectionReveal from "../components/SectionReveal";
 
 const team = [
   {
-    name: "Ahmed Raza",
-    role: "CEO & Founder",
-    initial: "A",
+    name: "Laiba Altaf",
+    role: "70136054",
+    initial: "L",
     icon: "solar:verified-check-bold",
     color: "from-purple-600 to-violet-600",
   },
   {
-    name: "Sara Malik",
-    role: "Head of Product",
-    initial: "S",
+    name: "Amna Khan",
+    role: "70137288",
+    initial: "A",
     icon: "solar:verified-check-bold",
     color: "from-pink-500 to-rose-500",
   },
   {
-    name: "Bilal Khan",
-    role: "Lead Developer",
-    initial: "B",
+    name: "Maryam Mamoon",
+    role: "70137183",
+    initial: "M",
     icon: "solar:verified-check-bold",
     color: "from-blue-500 to-cyan-500",
-  },
-  {
-    name: "Zara Ahmed",
-    role: "Marketing Lead",
-    initial: "Z",
-    icon: "solar:verified-check-bold",
-    color: "from-emerald-500 to-green-500",
   },
 ];
 //done updated
@@ -182,7 +175,7 @@ export default function About() {
     group
     relative
     overflow-hidden
-    bg-white
+    bg-purple-100
     rounded-3xl
     p-7
     border
@@ -225,13 +218,13 @@ export default function About() {
             <h2 className="text-2xl md:text-3xl font-bold text-secondary text-center mb-10">
               Meet the Team
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {team.map((t, i) => (
                 <motion.div
                   key={i}
                   whileHover={{ y: -8 }}
                   className="
-    bg-white
+    bg-purple-100
     rounded-3xl
     p-7
     border

@@ -222,7 +222,7 @@ export default function Features() {
   group
   relative
   overflow-hidden
-  bg-white
+  bg-purple-100
   rounded-3xl
   p-7
   border

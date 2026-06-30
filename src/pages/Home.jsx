@@ -237,21 +237,21 @@ export default function Home() {
           <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div className="text-center mb-14">
               <h2 className="mb-4 text-3xl font-black tracking-tight text-gray-900 md:text-4xl">
-                How Trendora Works
+                How Trendora Works with fyp
               </h2>
               <p className="text-gray-500">
                 Connect with brands, secure collaborations, and get paid in just
                 four simple steps.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-4 ">
               {steps.map((s, i) => (
                 <motion.div
                   key={i}
                   whileHover={{
                     y: -10,
                   }}
-                  className="relative p-6 transition-all duration-300 bg-white border border-purple-100 shadow-sm rounded-3xl hover:shadow-xl"
+                  className="relative p-6 transition-all duration-300 bg-purple-100 border border-purple-100 shadow-sm rounded-3xl hover:shadow-xl "
                 >
                   <motion.div
                     whileHover={{
@@ -320,7 +320,7 @@ export default function Home() {
                     y: -12,
                     scale: 1.03,
                   }}
-                  className="group relative p-8 bg-white border border-purple-100 rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-purple-100 transition-all duration-300"
+                  className="group relative p-8 bg-purple-100 border border-purple-100 rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-purple-100 transition-all duration-300"
                 >
                   <div className="mb-6">
                     <motion.div
@@ -430,7 +430,7 @@ export default function Home() {
                     y: -10,
                     scale: 1.03,
                   }}
-                  className="group relative overflow-hidden bg-white border border-purple-100 rounded-3xl p-6 shadow-sm hover:shadow-2xl hover:shadow-purple-100 transition-all duration-300"
+                  className="group relative overflow-hidden bg-purple-100 border border-purple-100 rounded-3xl p-6 shadow-sm hover:shadow-2xl hover:shadow-purple-100 transition-all duration-300"
                 >
                   <div className="absolute top-4 right-4 px-3 py-1 text-xs font-bold rounded-full bg-purple-100 text-purple-700">
                     {c.rank}
