@@ -861,6 +861,7 @@ font-bold
 text-sm
 transition-all
 
+
 ${
   page === p
     ? "bg-primary text-white shadow-lg shadow-purple-200"
